@@ -7,14 +7,14 @@ from .models import (
     VIA_EMAIL,VIA_PHONE
 
     )
-from .serializers import SingUpSerializers,UserChangeInfoSerializers
+from .serializers import *
 from rest_framework.views import APIView
 from datetime import timedelta,datetime
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from shared.views import send_email
-
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class SignUpView(CreateAPIView):
     permission_classes = (AllowAny, )
@@ -85,6 +85,25 @@ class UserChangeInfoView(UpdateAPIView):
         return Response(response)
 
 
+class UserChangePhotoView(UpdateAPIView):
+    permission_classes = (IsAuthenticated, )
+    serializer_class = UserPhotoSerializers
+    queryset = CustomUser
+
+    def get_object(self):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(self.get_object(), data=request.data,partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        response = {
+            "status": status.HTTP_201_CREATED,
+            "message": "Siz muvaffaqiyatli ro'yxatdan o'tdiz!"
+        },
+        return Response(response)
 
 
+class LoginView(TokenObtainPairView):
+    serializer_class = LoginSerializers
 

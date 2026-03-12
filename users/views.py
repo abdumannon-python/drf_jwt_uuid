@@ -103,7 +103,27 @@ class UserChangePhotoView(UpdateAPIView):
         },
         return Response(response)
 
+"""TokenObtainPairView bilan yozilgani!!!"""
+# class LoginView(TokenObtainPairView):
+#     serializer_class = LoginSerializers
 
-class LoginView(TokenObtainPairView):
-    serializer_class = LoginSerializers
 
+"""APIView da yozilgan"""
+
+class LoginView(APIView):
+    permission_classes = (IsAuthenticated, )
+    def post(self,request):
+        user=self.request.user
+        serializer=LoginSerializers(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = {
+             "refresh":user.token()['refresh'],
+             "access": user.token()['access'],
+             "user": {
+                "username": user.username,
+                 "email": user.email
+             }
+        }
+
+        return Response(data)

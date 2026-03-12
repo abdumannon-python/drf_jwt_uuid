@@ -152,26 +152,76 @@ class UserPhotoSerializers(serializers.Serializer):
         instance.save()
         return instance
 
-class LoginSerializers(TokenObtainSerializer):
+# class LoginSerializers(TokenObtainSerializer):
+#     password=serializers.CharField(required=True,write_only=True)
+#
+#     def __init__(self,*args,**kwargs):
+#         super().__init__(*args,**kwargs)
+#         self.fields['user_input']=serializers.CharField(required=True,write_only=True)
+#         self.fields['username'] = serializers.CharField(required=False, allow_blank=True)
+#
+#     def validate(self, attrs):
+#         user=self.check_user_type(attrs)
+#
+#         data ={
+#             "refresh":user.token()['refresh'],
+#             "access": user.token()['access'],
+#             "user": {
+#                 "username": user.username,
+#                 "email": user.email
+#             }
+#         }
+#
+#         return data
+#
+#
+#     def check_user_type(self,data):
+#         password=data.get('password')
+#         user_input=data.get('user_input')
+#         user_input_type=check_email_or_phone_or_username(user_input)
+#         if user_input_type=='username':
+#             user=CustomUser.objects.filter(username=user_input).first()
+#             self.get_object(user)
+#             username=user.username
+#         elif user_input_type=='email':
+#             user=CustomUser.objects.filter(email=user_input).first()
+#             self.get_object(user)
+#             username=user.username
+#
+#         elif user_input_type=='phone':
+#             user=CustomUser.objects.filter(phone_number=user_input).first()
+#             self.get_object(user)
+#             username=user.username
+#         else:
+#             raise ValidationError(detail='Malumot topilmadi')
+#
+#         authentication_kwargs={
+#             "password":password,
+#             self.username_field:username
+#         }
+#         if user.auth_status not in [DONE,PHOTO_DONE]:
+#             raise ValidationError({'message':'siz hali toliq royxatdan otmagansiz '})
+#
+#         user=authenticate(**authentication_kwargs)
+#
+#         if not user:
+#             raise ValidationError('login yoki parol xato')
+#
+#         return user
+#
+#
+#     def get_object(self,user):
+#         if not user:
+#             raise ValidationError({'message':'Xato malumot kiridingiz'})
+#         return True
+"""Serializer ni o'zida yozilgan """
+class LoginSerializers(serializers.Serializer):
     password=serializers.CharField(required=True,write_only=True)
-
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
-        self.fields['user_input']=serializers.CharField(required=True,write_only=True)
-        self.fields['username'] = serializers.CharField(required=False, allow_blank=True)
+    user_input=serializers.CharField(required=True,write_only=True)
+    username_field=serializers.CharField(read_only=True)
 
     def validate(self, attrs):
-        user=self.check_user_type(attrs)
-
-        data ={
-            "refresh":user.token()['refresh'],
-            "access": user.token()['access'],
-            "user": {
-                "username": user.username,
-                "email": user.email
-            }
-        }
-
+        data=self.check_user_type(attrs)
         return data
 
 
@@ -197,7 +247,7 @@ class LoginSerializers(TokenObtainSerializer):
 
         authentication_kwargs={
             "password":password,
-            self.username_field:username
+            "username":username
         }
         if user.auth_status not in [DONE,PHOTO_DONE]:
             raise ValidationError({'message':'siz hali toliq royxatdan otmagansiz '})
@@ -214,7 +264,6 @@ class LoginSerializers(TokenObtainSerializer):
         if not user:
             raise ValidationError({'message':'Xato malumot kiridingiz'})
         return True
-
 
 
 
